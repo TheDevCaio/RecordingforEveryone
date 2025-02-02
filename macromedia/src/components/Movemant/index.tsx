@@ -27,7 +27,7 @@ const Movemant: React.FC = () => {
 
   return (
     <div>
-      <h1>Grave e Repita Movimentos do Quadrado</h1>
+      <h1>Grave e Repita Movimentos no Quadrado</h1>
       <div
         style={{
           width: 100,
