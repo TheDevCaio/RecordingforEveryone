@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const Movimentacao: React.FC = () => {
+const Movemant: React.FC = () => {
   const [posicao, setPosicao] = useState({ x: 0, y: 0 });
   const [movimentos, setMovimentos] = useState<{ x: number; y: number }[]>([]);
   const [gravando, setGravando] = useState(false);
@@ -16,9 +16,18 @@ const Movimentacao: React.FC = () => {
     setGravando(!gravando);
   };
 
+  const repetirMovimentos = () => {
+    if (movimentos.length === 0) return;
+    movimentos.forEach((movimento, index) => {
+      setTimeout(() => {
+        setPosicao({ x: movimento.x - 50, y: movimento.y - 50 });
+      }, index * 100);
+    });
+  };
+
   return (
     <div>
-      <h1>Grave os Movimentos do Quadrado</h1>
+      <h1>Grave e Repita Movimentos do Quadrado</h1>
       <div
         style={{
           width: 100,
@@ -35,9 +44,10 @@ const Movimentacao: React.FC = () => {
       <button onClick={toggleGravacao}>
         {gravando ? 'Parar Gravação' : 'Começar Gravação'}
       </button>
+      <button onClick={repetirMovimentos}>Repetir Movimentos</button>
       <p>Movimentos gravados: {movimentos.length}</p>
     </div>
   );
 };
 
-export default Movimentacao;
+export default Movemant;
