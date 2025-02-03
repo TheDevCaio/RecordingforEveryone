@@ -1,53 +1,91 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
-const Movemant: React.FC = () => {
-  const [posicao, setPosicao] = useState({ x: 0, y: 0 });
-  const [movimentos, setMovimentos] = useState<{ x: number; y: number }[]>([]);
-  const [gravando, setGravando] = useState(false);
+const Movement: React.FC = () => {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [movements, setMovements] = useState<{ x: number; y: number; clicked: boolean }[]>([]);
+  const [recording, setRecording] = useState(false);
+  const [currentlyRecording, setCurrentlyRecording] = useState(false);
+  const squareRef = useRef<HTMLDivElement | null>(null);
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (gravando) {
-      setMovimentos([...movimentos, { x: e.clientX, y: e.clientY }]);
+    if (currentlyRecording) {
+
+      setMovements((prevMovements) => [
+        ...prevMovements,
+        { x: e.clientX, y: e.clientY, clicked: false }
+      ]);
     }
-    setPosicao({ x: e.clientX - 50, y: e.clientY - 50 });
+    setPosition({ x: e.clientX - 50, y: e.clientY - 50 });
   };
 
-  const toggleGravacao = () => {
-    setGravando(!gravando);
+  const handleMouseDown = () => {
+    if (recording) {
+
+      setCurrentlyRecording(true);
+    }
   };
 
-  const repetirMovimentos = () => {
-    if (movimentos.length === 0) return;
-    movimentos.forEach((movimento, index) => {
+  const handleMouseUp = () => {
+    if (recording) {
+  
+      setCurrentlyRecording(false);
+      setMovements((prevMovements) => {
+        const updatedMovements = [...prevMovements];
+        updatedMovements[updatedMovements.length - 1].clicked = true;
+        return updatedMovements;
+      });
+    }
+  };
+
+  const toggleRecording = () => {
+    setRecording(!recording);
+  };
+
+  const repeatMovements = () => {
+    if (movements.length === 0) return;
+
+    movements.forEach((movement, index) => {
       setTimeout(() => {
-        setPosicao({ x: movimento.x - 50, y: movimento.y - 50 });
-      }, index * 100);
+        setPosition({ x: movement.x - 50, y: movement.y - 50 });
+        if (movement.clicked && squareRef.current) {
+  
+          const clickEvent = new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            clientX: movement.x,
+            clientY: movement.y,
+          });
+          squareRef.current.dispatchEvent(clickEvent);
+        }
+      }, index * 100); 
     });
   };
 
   return (
     <div>
-      <h1>Grave e Repita Movimentos no Quadrado</h1>
+      <h1>Record and Repeat Movements with Autoclick</h1>
       <div
+        ref={squareRef}
         style={{
           width: 100,
           height: 100,
           backgroundColor: 'blue',
           position: 'absolute',
-          left: `${posicao.x}px`,
-          top: `${posicao.y}px`,
+          left: `${position.x}px`,
+          top: `${position.y}px`,
           cursor: 'pointer',
         }}
         onMouseMove={handleMouseMove}
-        onMouseDown={toggleGravacao}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
       />
-      <button onClick={toggleGravacao}>
-        {gravando ? 'Parar Gravação' : 'Começar Gravação'}
+      <button onClick={toggleRecording}>
+        {recording ? 'Stop Recording' : 'Start Recording'}
       </button>
-      <button onClick={repetirMovimentos}>Repetir Movimentos</button>
-      <p>Movimentos gravados: {movimentos.length}</p>
+      <button onClick={repeatMovements}>Repeat Movements</button>
+      <p>Recorded movements: {movements.length}</p>
     </div>
   );
 };
 
-export default Movemant;
+export default Movement;
